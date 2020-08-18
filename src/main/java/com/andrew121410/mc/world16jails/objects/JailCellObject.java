@@ -1,6 +1,7 @@
 package com.andrew121410.mc.world16jails.objects;
 
 import org.bukkit.Location;
+import org.bukkit.block.data.type.Door;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
@@ -39,7 +40,18 @@ public class JailCellObject implements ConfigurationSerializable {
     }
 
     public void setDoorLocation(Location doorLocation) {
-        this.doorLocation = doorLocation;
+        Location newDoorLocation;
+        Door door = JailObject.isDoor(doorLocation);
+        if (door != null) {
+            if (door.getHalf().toString().equals("TOP")) {
+                newDoorLocation = doorLocation.clone().subtract(0, 1, 0);
+            } else newDoorLocation = doorLocation;
+        } else newDoorLocation = doorLocation.clone().add(0, 1, 0);
+        if (JailObject.isDoor(newDoorLocation) == null) this.doorLocation = null;
+        door = (Door) newDoorLocation.getBlock().getBlockData();
+        door.setOpen(true);
+        doorLocation.getBlock().setBlockData(door);
+        this.doorLocation = newDoorLocation;
     }
 
     public Location getSpawnLocation() {

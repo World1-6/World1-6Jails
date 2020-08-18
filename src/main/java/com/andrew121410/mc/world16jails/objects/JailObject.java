@@ -6,11 +6,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,10 +51,21 @@ public class JailObject implements ConfigurationSerializable {
             jailCellObject = optionalJailCellObject.get();
         } else jailCellObject = this.jailCells.get(number);
         if (jailCellObject == null) return;
+
+        //Check if there is a door if some how the door was removed then set door location back to null.
+        if (jailCellObject.getDoorLocation() != null) {
+            if (!IfDoorThenDoIfNotThenFalse(jailCellObject.getDoorLocation().getBlock(), false)) {
+                jailCellObject.setDoorLocation(null);
+            }
+        }
+
+        //Create JailPlayerObject
         JailPlayerObject jailPlayerObject = new JailPlayerObject(player.getUniqueId(), seconds, this.name, jailCellObject.getNumber());
         jailCellObject.setJailPlayerObject(jailPlayerObject);
+        //Teleport player to cell.
         player.teleport(jailCellObject.getSpawnLocation());
-        player.sendMessage(Translate.color("&cYou have been placed in jail for: " + seconds));
+        player.sendMessage(Translate.color("&c&lYou have been jailed for " + seconds + " seconds."));
+
         jailPlayerObject.getCountdownTimer().scheduleTimer();
         World16Jails.getPlugin().getSetListMap().getJailPlayersMap().put(player.getUniqueId(), jailPlayerObject);
     }
@@ -65,18 +76,19 @@ public class JailObject implements ConfigurationSerializable {
             throw new NullPointerException("Class: " + this.getClass() + " Function: releasePlayer -> jailCellObject == null");
         }
         Location doorLocation = jailCellObject.getDoorLocation();
-        if (doorLocation != null) {
-            Block jailDoorBlock = doorLocation.getBlock().getRelative(BlockFace.UP);
-            if (IfDoorThenDoIfNotThenFalse(jailDoorBlock, true)) {
-                jailPlayerObject.getPlayer().sendMessage(Translate.color("&6You have been released!"));
-            } else {
-                jailPlayerObject.getPlayer().sendMessage(Translate.color("&cYou have been released from jail."));
-                jailPlayerObject.getPlayer().teleport(jailPlayerObject.getPlayer().getWorld().getSpawnLocation());
-            }
-        }
         jailCellObject.setJailPlayerObject(null);
+        Player player = jailPlayerObject.getPlayer();
         World16Jails.getPlugin().getJailManager().deletePlayer(jailPlayerObject.getUuid());
         World16Jails.getPlugin().getSetListMap().getJailPlayersMap().remove(jailPlayerObject.getUuid());
+        if (doorLocation != null) {
+            Block jailDoorBlock = doorLocation.getBlock();
+            if (IfDoorThenDoIfNotThenFalse(jailDoorBlock, true)) {
+                player.sendMessage(Translate.color("&6You have been released!"));
+            } else {
+                jailPlayerObject.getPlayer().sendMessage(Translate.color("&cYou have been released from jail."));
+                player.teleport(player.getWorld().getSpawnLocation());
+            }
+        }
     }
 
     public static Door isDoor(Location location) {

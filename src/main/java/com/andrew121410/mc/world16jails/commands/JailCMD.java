@@ -117,6 +117,10 @@ public class JailCMD implements CommandExecutor {
                 return true;
             }
         } else if (args.length == 2 && args[0].equalsIgnoreCase("delete")) {
+            if (!player.hasPermission("world16.jail.delete")) {
+                player.sendMessage(Translate.color("&4You don't have permission -> world16.jail.incarcerate"));
+                return true;
+            }
             JailObject jailObject = this.jailsMap.get(args[1]);
             if (jailObject == null) {
                 player.sendMessage("&cCould not find jail.");
@@ -152,11 +156,15 @@ public class JailCMD implements CommandExecutor {
             this.jailManager.jailPlayer(player1, jailName, null, seconds);
             player.sendMessage(Translate.color("&aPlayer has been jailed."));
             return true;
+        } else if (args.length == 1 && args[0].equalsIgnoreCase("version")) {
+            player.sendMessage(Translate.color("&6Jail version: " + World16Jails.VERSION + " made by Andrew121410."));
+            return true;
         } else {
             player.sendMessage(Translate.color("&6/jail create <Name>"));
             player.sendMessage(Translate.color("&6/jail cell &r- Show's help for cell stuff."));
             player.sendMessage(Translate.color("&6/jail delete <Name>"));
             player.sendMessage(Translate.color("&6/jail incarcerate <Player> <Jail> <Seconds>"));
+            return true;
         }
         return true;
     }

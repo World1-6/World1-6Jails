@@ -78,12 +78,16 @@ public class JailManager {
     }
 
     public void saveAllJailedPlayers() {
-        this.jailPlayerMap.forEach(((uuid, jailPlayerObject) -> savePlayer(jailPlayerObject)));
+        this.jailPlayerMap.forEach(((uuid, jailPlayerObject) -> {
+            jailPlayerObject.getCountdownTimer().cancelTimer();
+            savePlayer(jailPlayerObject);
+        }));
     }
 
     public void unloadPlayer(UUID uuid) {
         JailPlayerObject jailPlayerObject = this.jailPlayerMap.get(uuid);
         if (jailPlayerObject == null) return;
+        jailPlayerObject.getCountdownTimer().cancelTimer();
         savePlayer(jailPlayerObject);
         this.jailPlayerMap.remove(uuid);
     }

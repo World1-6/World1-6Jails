@@ -39,7 +39,7 @@ public class JailTab implements TabCompleter {
         List<String> listOfPlayer = this.plugin.getServer().getOnlinePlayers().stream().map(Player::getDisplayName).collect(Collectors.toList());
 
         if (args.length == 1) {
-            return TabUtils.getContainsString(args[0], Arrays.asList("create", "cell", "delete", "incarcerate"));
+            return TabUtils.getContainsString(args[0], Arrays.asList("create", "cell", "delete", "incarcerate", "version"));
         } else if (args[0].equalsIgnoreCase("cell")) {
             if (args.length == 2) {
                 return TabUtils.getContainsString(args[1], Arrays.asList("create", "delete", "setdoor", "setspawn"));
