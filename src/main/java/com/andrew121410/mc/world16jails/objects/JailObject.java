@@ -71,6 +71,7 @@ public class JailObject implements ConfigurationSerializable {
         Location doorLocation = jailCellObject.getDoorLocation();
         jailCellObject.setJailPlayerObject(null);
         Player player = jailPlayerObject.getPlayer();
+        jailPlayerObject.getCountdownTimer().cancelTimer();
         World16Jails.getPlugin().getJailManager().deletePlayer(jailPlayerObject.getUuid());
         World16Jails.getPlugin().getSetListMap().getJailPlayersMap().remove(jailPlayerObject.getUuid());
         if (doorLocation != null) {
