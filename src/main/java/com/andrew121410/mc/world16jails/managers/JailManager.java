@@ -112,6 +112,7 @@ public class JailManager {
         //So this runs when the player was put in jail but somebody deleted the jail.
         if (jailObject == null) {
             jailPlayerObject.getPlayer().sendMessage(Translate.color("&6The jail was deleted but you were in in but you have been released."));
+            jailPlayerObject.getCountdownTimer().cancelTimer();
             this.jailPlayerMap.remove(jailPlayerObject.getUuid());
             return;
         }
