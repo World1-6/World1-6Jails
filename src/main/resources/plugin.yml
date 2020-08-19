@@ -1,7 +1,7 @@
 name: World1-6Jails
 version: 1.0
 author: Andrew121410
-main: com.andrew121410.mc.world16jails.Main
+main: com.andrew121410.mc.world16jails.World16Jails
 api-version: 1.16
 
 commands:

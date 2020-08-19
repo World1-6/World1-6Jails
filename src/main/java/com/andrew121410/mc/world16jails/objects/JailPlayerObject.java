@@ -25,6 +25,9 @@ public class JailPlayerObject implements ConfigurationSerializable {
     public JailPlayerObject(UUID uuid, int secondsLeft, String jailName, int cellNumber) {
         this.uuid = uuid;
         this.countdownTimer = new CountdownTimer(World16Jails.getPlugin(), secondsLeft + 10, secondsLeft, () -> World16Jails.getPlugin().getJailManager().releasePlayer(get()), (countdownTimer1 -> {
+            Player player1 = getPlayer();
+            if (player1 == null) return;
+            if (!player1.isOnline()) return;
             getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(Translate.color("&6You have " + countdownTimer1.getSecondsLeft() + " seconds left!")));
         }));
         this.jailName = jailName;

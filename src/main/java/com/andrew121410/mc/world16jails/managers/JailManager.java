@@ -48,6 +48,7 @@ public class JailManager {
     private void saveJail(JailObject jailObject) {
         ConfigurationSection jailsSection = this.jailsYml.getConfig().getConfigurationSection("Jails");
         jailsSection.set(jailObject.getName(), jailObject);
+        this.jailsYml.saveConfig();
     }
 
     public void loadAllJails() {
@@ -69,11 +70,13 @@ public class JailManager {
     private void savePlayer(JailPlayerObject jailPlayerObject) {
         ConfigurationSection jailPlayersSection = this.jailsYml.getConfig().getConfigurationSection("JailPlayers");
         jailPlayersSection.set(jailPlayerObject.getUuid().toString(), jailPlayerObject);
+        this.jailsYml.saveConfig();
     }
 
     public void loadPlayer(Player player) {
         JailPlayerObject jailPlayerObject = loadPlayer(player.getUniqueId());
         if (jailPlayerObject == null) return; //Player isn't in jail so return.
+        jailPlayerObject.getCountdownTimer().scheduleTimer();
         this.jailPlayerMap.put(player.getUniqueId(), jailPlayerObject);
     }
 
@@ -95,11 +98,13 @@ public class JailManager {
     public void deletePlayer(UUID uuid) {
         ConfigurationSection jailPlayersSection = this.jailsYml.getConfig().getConfigurationSection("JailPlayers");
         jailPlayersSection.set(uuid.toString(), null);
+        this.jailsYml.saveConfig();
     }
 
     public void deleteJail(String name) {
         ConfigurationSection jailsSection = this.jailsYml.getConfig().getConfigurationSection("Jails");
         jailsSection.set(name, null);
+        this.jailsYml.saveConfig();
     }
 
     public void releasePlayer(JailPlayerObject jailPlayerObject) {
