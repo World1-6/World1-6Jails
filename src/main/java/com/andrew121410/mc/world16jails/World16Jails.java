@@ -30,6 +30,7 @@ public class World16Jails extends JavaPlugin {
         plugin = this;
         this.setListMap = new SetListMap();
         this.jailManager = new JailManager(this);
+        this.jailManager.loadAllJails();
         regEvents();
         regCommands();
     }
