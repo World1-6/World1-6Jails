@@ -40,13 +40,17 @@ public class JailCellObject implements ConfigurationSerializable {
     }
 
     public void setDoorLocation(Location doorLocation) {
+        if (doorLocation == null) {
+            this.doorLocation = null;
+            return;
+        }
         Location newDoorLocation;
         Door door = JailObject.isDoor(doorLocation);
         if (door != null) {
             if (door.getHalf().toString().equals("TOP")) {
-                newDoorLocation = doorLocation.clone().subtract(0, 1, 0);
+                newDoorLocation = doorLocation.subtract(0, 1, 0);
             } else newDoorLocation = doorLocation;
-        } else newDoorLocation = doorLocation.clone().add(0, 1, 0);
+        } else newDoorLocation = doorLocation.add(0, 1, 0);
         if (JailObject.isDoor(newDoorLocation) == null) this.doorLocation = null;
         door = (Door) newDoorLocation.getBlock().getBlockData();
         door.setOpen(true);

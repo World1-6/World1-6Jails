@@ -25,6 +25,11 @@ public class OnPlayerCommandPreprocessEvent implements Listener {
     @EventHandler
     public void onPreCommandPreProcess(PlayerCommandPreprocessEvent event) {
         if (jailPlayerObjectMap.containsKey(event.getPlayer().getUniqueId())) {
+            if (event.getPlayer().hasPermission("world16.jail.release") && event.getMessage().equalsIgnoreCase("/jail release")) {
+                this.plugin.getJailManager().releasePlayer(jailPlayerObjectMap.get(event.getPlayer().getUniqueId()));
+                event.setCancelled(true);
+                return;
+            }
             event.getPlayer().sendMessage(Translate.color("&4You are unable to use commands while in jail."));
             event.setCancelled(true);
         }
