@@ -10,7 +10,6 @@ import org.bukkit.block.data.type.Door;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,23 +19,17 @@ import java.util.Optional;
 public class JailObject implements ConfigurationSerializable {
 
     private String name;
+    private Location jailLocation;
     private Map<Integer, JailCellObject> jailCells;
 
-    public JailObject(String name, Map<Integer, JailCellObject> jailCellObjects) {
+    public JailObject(String name, Location jailLocation, Map<Integer, JailCellObject> jailCellObjects) {
         this.name = name;
+        this.jailLocation = jailLocation;
         this.jailCells = jailCellObjects;
     }
 
-    public JailObject(String name) {
-        this(name, new HashMap<>());
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Map<Integer, JailCellObject> getJailCells() {
-        return jailCells;
+    public JailObject(String name, Location jailLocation) {
+        this(name, jailLocation, new HashMap<>());
     }
 
     public void jailPlayer(Player player, Integer number, int seconds) {
@@ -89,6 +82,7 @@ public class JailObject implements ConfigurationSerializable {
                 player.teleport(player.getWorld().getSpawnLocation());
             }
         }
+        Bukkit.getServer().broadcastMessage(Translate.color("&9[Jail]&r&6 " + player.getDisplayName() + " has been released from jail."));
     }
 
     public static Door isDoor(Location location) {
@@ -107,15 +101,28 @@ public class JailObject implements ConfigurationSerializable {
         return true;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public Location getJailLocation() {
+        return jailLocation;
+    }
+
+    public Map<Integer, JailCellObject> getJailCells() {
+        return jailCells;
+    }
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         map.put("Name", this.name);
+        map.put("JailLocation", this.jailLocation);
         map.put("JailCells", this.jailCells);
         return map;
     }
 
     public static JailObject deserialize(Map<String, Object> map) {
-        return new JailObject((String) map.get("Name"), (Map<Integer, JailCellObject>) map.get("JailCells"));
+        return new JailObject((String) map.get("Name"), (Location) map.get("JailLocation"), (Map<Integer, JailCellObject>) map.get("JailCells"));
     }
 }

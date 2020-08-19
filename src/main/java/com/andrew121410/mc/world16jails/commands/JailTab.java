@@ -39,7 +39,7 @@ public class JailTab implements TabCompleter {
         List<String> listOfPlayer = this.plugin.getServer().getOnlinePlayers().stream().map(Player::getDisplayName).collect(Collectors.toList());
 
         if (args.length == 1) {
-            return TabUtils.getContainsString(args[0], Arrays.asList("create", "cell", "delete", "incarcerate", "version"));
+            return TabUtils.getContainsString(args[0], Arrays.asList("create", "cell", "delete", "incarcerate", "tp", "release", "version"));
         } else if (args[0].equalsIgnoreCase("cell")) {
             if (args.length == 2) {
                 return TabUtils.getContainsString(args[1], Arrays.asList("create", "delete", "setdoor", "setspawn"));
@@ -56,6 +56,16 @@ public class JailTab implements TabCompleter {
                 return TabUtils.getContainsString(args[1], listOfPlayer);
             } else if (args.length == 3) {
                 return TabUtils.getContainsString(args[2], listOfJails);
+            }
+            return null;
+        } else if (args[0].equalsIgnoreCase("tp")) {
+            if (args.length == 2) {
+                return TabUtils.getContainsString(args[1], listOfJails);
+            }
+            return null;
+        } else if (args[0].equalsIgnoreCase("release")) {
+            if (args.length == 2) {
+                return TabUtils.getContainsString(args[1], listOfPlayer);
             }
             return null;
         }

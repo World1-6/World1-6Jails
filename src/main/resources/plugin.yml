@@ -7,7 +7,6 @@ api-version: 1.16
 commands:
   jail:
     permission: world16.jail
-    usage: "/<command> [create|cell|delete|incarcerate|version"
 
 permissions:
   world16.jail:
@@ -20,3 +19,5 @@ permissions:
     description: Allows you to delete a jail
   world16.jail.incarcerate:
     description: Allows you to jail a person
+  world16.jail.release:
+    description: Allows you to release a player from jail

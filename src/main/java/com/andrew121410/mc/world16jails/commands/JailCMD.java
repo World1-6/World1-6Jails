@@ -63,7 +63,7 @@ public class JailCMD implements CommandExecutor {
                 return true;
             }
 
-            JailObject jailObject = new JailObject(jailName);
+            JailObject jailObject = new JailObject(jailName, player.getLocation());
             this.jailsMap.put(jailName, jailObject);
             player.sendMessage(Translate.color("&aJail: " + jailName + " has been created!"));
             return true;
@@ -156,6 +156,39 @@ public class JailCMD implements CommandExecutor {
             this.jailManager.jailPlayer(player1, jailName, null, seconds);
             player.sendMessage(Translate.color("&aPlayer has been jailed."));
             return true;
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("tp")) {
+            String jailName = args[1];
+            JailObject jailObject = this.jailsMap.get(jailName);
+
+            if (jailObject == null) {
+                player.sendMessage(Translate.color("&cNot a jail."));
+                return true;
+            }
+
+            player.teleport(jailObject.getJailLocation());
+            player.sendMessage(Translate.color("&6Teleporting..."));
+            return true;
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("release")) {
+            if (!player.hasPermission("world16.jail.release")) {
+                player.sendMessage(Translate.color("&4You don't have permission -> world16.jail.incarcerate"));
+                return true;
+            }
+            String playerName = args[1];
+            Player player1 = this.plugin.getServer().getPlayer(playerName);
+
+            if (player1 == null) {
+                player.sendMessage(Translate.color("&cCould not find the player?"));
+                return true;
+            }
+
+            if (!this.jailPlayerMap.containsKey(player1.getUniqueId())) {
+                player.sendMessage(Translate.color("&cThat player isn't in jail."));
+                return true;
+            }
+
+            this.jailManager.releasePlayer(this.jailPlayerMap.get(player1.getUniqueId()));
+            player.sendMessage(Translate.color("&aThe player " + player1.getDisplayName() + " has been released from jail"));
+            return true;
         } else if (args.length == 1 && args[0].equalsIgnoreCase("version")) {
             player.sendMessage(Translate.color("&6Jail version: " + World16Jails.VERSION + " made by Andrew121410."));
             return true;
@@ -164,6 +197,8 @@ public class JailCMD implements CommandExecutor {
             player.sendMessage(Translate.color("&6/jail cell &r- Show's help for cell stuff."));
             player.sendMessage(Translate.color("&6/jail delete <Name>"));
             player.sendMessage(Translate.color("&6/jail incarcerate <Player> <Jail> <Seconds>"));
+            player.sendMessage(Translate.color("&6/jail tp <JailName>"));
+            player.sendMessage(Translate.color("&6/jail release <User>"));
             return true;
         }
         return true;
