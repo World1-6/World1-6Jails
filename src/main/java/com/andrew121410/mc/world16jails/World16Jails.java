@@ -6,6 +6,7 @@ import com.andrew121410.mc.world16jails.managers.JailManager;
 import com.andrew121410.mc.world16jails.objects.JailCellObject;
 import com.andrew121410.mc.world16jails.objects.JailObject;
 import com.andrew121410.mc.world16jails.objects.JailPlayerObject;
+import com.andrew121410.mc.world16jails.utils.OtherPlugins;
 import com.andrew121410.mc.world16jails.utils.SetListMap;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,10 +19,11 @@ public class World16Jails extends JavaPlugin {
         ConfigurationSerialization.registerClass(JailObject.class, "JailObject");
     }
 
-    public static final String VERSION = "1.0";
+    public static final String VERSION = "1.1";
 
     private static World16Jails plugin;
     private SetListMap setListMap;
+    private OtherPlugins otherPlugins;
 
     private JailManager jailManager;
 
@@ -29,6 +31,7 @@ public class World16Jails extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         this.setListMap = new SetListMap();
+        this.otherPlugins = new OtherPlugins(this);
         this.jailManager = new JailManager(this);
         this.jailManager.loadAllJails();
         regEvents();
@@ -60,6 +63,10 @@ public class World16Jails extends JavaPlugin {
 
     public JailManager getJailManager() {
         return jailManager;
+    }
+
+    public OtherPlugins getOtherPlugins() {
+        return otherPlugins;
     }
 
     public static World16Jails getPlugin() {
