@@ -45,6 +45,8 @@ public class JailTab implements TabCompleter {
                 return TabUtils.getContainsString(args[1], Arrays.asList("create", "delete", "setdoor", "setspawn"));
             } else if (args.length == 3) {
                 return TabUtils.getContainsString(args[2], listOfJails);
+            } else if (args.length == 4 && !args[1].equalsIgnoreCase("create")) {
+                return this.jailsMap.containsKey(args[2]) ? this.jailsMap.get(args[2]).getJailCells().keySet().stream().map(String::valueOf).collect(Collectors.toList()) : null;
             }
         } else if (args[0].equalsIgnoreCase("delete")) {
             if (args.length == 2) {
