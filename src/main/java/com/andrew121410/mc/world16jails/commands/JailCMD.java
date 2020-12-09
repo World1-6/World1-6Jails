@@ -80,7 +80,7 @@ public class JailCMD implements CommandExecutor {
                 return true;
             } else if (args.length == 4) {
                 JailObject jailObject = this.jailsMap.get(args[2]);
-                Integer integer = api.asIntOrDefault(args[3], Integer.MIN_VALUE);
+                Integer integer = Utils.asIntegerOrElse(args[3], Integer.MIN_VALUE);
                 if (jailObject == null) {
                     player.sendMessage(Translate.color("&cJail doesn't exist"));
                     return true;
@@ -137,7 +137,7 @@ public class JailCMD implements CommandExecutor {
             }
             String playerName = args[1];
             String jailName = args[2];
-            Integer seconds = api.asIntOrDefault(args[3], Integer.MIN_VALUE);
+            Integer seconds = Utils.asIntegerOrElse(args[3], Integer.MIN_VALUE);
 
             Player player1 = this.plugin.getServer().getPlayer(playerName);
             if (player1 == null) {
