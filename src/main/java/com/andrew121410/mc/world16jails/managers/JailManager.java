@@ -13,12 +13,12 @@ import java.util.UUID;
 
 public class JailManager {
 
-    private Map<String, JailObject> jailsMap;
-    private Map<UUID, JailPlayerObject> jailPlayerMap;
+    private final Map<String, JailObject> jailsMap;
+    private final Map<UUID, JailPlayerObject> jailPlayerMap;
 
-    private World16Jails plugin;
+    private final World16Jails plugin;
 
-    private CustomYmlManager jailsYml;
+    private final CustomYmlManager jailsYml;
 
     public JailManager(World16Jails plugin) {
         this.plugin = plugin;

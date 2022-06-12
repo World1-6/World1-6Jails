@@ -12,9 +12,9 @@ import java.util.UUID;
 
 public class OnPlayerTeleportEvent implements Listener {
 
-    private Map<UUID, JailPlayerObject> jailPlayerObjectMap;
+    private final Map<UUID, JailPlayerObject> jailPlayerObjectMap;
 
-    private World16Jails plugin;
+    private final World16Jails plugin;
 
     public OnPlayerTeleportEvent(World16Jails plugin) {
         this.plugin = plugin;

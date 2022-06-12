@@ -7,44 +7,42 @@ import com.andrew121410.mc.world16jails.objects.JailObject;
 import com.andrew121410.mc.world16jails.objects.JailPlayerObject;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.player.PlayerUtils;
+import com.andrew121410.mc.world16utils.utils.TabUtils;
 import com.andrew121410.mc.world16utils.utils.Utils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
-public class JailCMD implements CommandExecutor {
+public class JailCMD implements CommandExecutor, TabCompleter {
 
-    private Map<String, JailObject> jailsMap;
-    private Map<UUID, JailPlayerObject> jailPlayerMap;
+    private final Map<String, JailObject> jailsMap;
+    private final Map<UUID, JailPlayerObject> jailPlayerMap;
 
-    private World16Jails plugin;
-    private Utils api;
-    private JailManager jailManager;
+    private final World16Jails plugin;
+    private final JailManager jailManager;
 
     public JailCMD(World16Jails plugin) {
         this.plugin = plugin;
-        this.api = new Utils();
+        this.jailManager = this.plugin.getJailManager();
 
         this.jailsMap = this.plugin.getSetListMap().getJailsMap();
         this.jailPlayerMap = this.plugin.getSetListMap().getJailPlayersMap();
 
-        this.jailManager = this.plugin.getJailManager();
-
         this.plugin.getCommand("jail").setExecutor(this);
-        this.plugin.getCommand("jail").setTabCompleter(new JailTab(this.plugin));
+        this.plugin.getCommand("jail").setTabCompleter(this);
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage("Only Players Can Use This Command.");
             return true;
         }
-        Player player = (Player) sender;
 
         if (!player.hasPermission("world16.jail")) {
             player.sendMessage(Translate.color("&4You don't have permission -> world16.jail"));
@@ -96,23 +94,23 @@ public class JailCMD implements CommandExecutor {
                 }
 
                 switch (args[1].toLowerCase()) {
-                    case "create":
+                    case "create" -> {
                         JailCellObject jailCellObject1 = new JailCellObject(integer, player.getLocation(), null, null);
                         jailObject.getJailCells().putIfAbsent(integer, jailCellObject1);
                         player.sendMessage(Translate.color("&aJail cell has been created."));
-                        break;
-                    case "delete":
+                    }
+                    case "delete" -> {
                         jailObject.getJailCells().remove(integer);
                         player.sendMessage(Translate.color("&4Jail cell has been deleted"));
-                        break;
-                    case "setdoor":
+                    }
+                    case "setdoor" -> {
                         jailCellObject.setDoorLocation(PlayerUtils.getBlockPlayerIsLookingAt(player).getLocation());
                         player.sendMessage(Translate.color("&aDoor has been set for the cell."));
-                        break;
-                    case "setspawn":
+                    }
+                    case "setspawn" -> {
                         jailCellObject.setSpawnLocation(player.getLocation());
                         player.sendMessage(Translate.color("&aThe setspawn for that cell has been changed!"));
-                        break;
+                    }
                 }
                 return true;
             }
@@ -202,5 +200,49 @@ public class JailCMD implements CommandExecutor {
             return true;
         }
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String alies, String[] args) {
+        if (!(sender instanceof Player player)) return null;
+        if (!player.hasPermission("world16.jail")) return null;
+
+        List<String> listOfJails = new ArrayList<>(this.jailsMap.keySet());
+        List<String> listOfPlayer = this.plugin.getServer().getOnlinePlayers().stream().map(Player::getDisplayName).collect(Collectors.toList());
+
+        if (args.length == 1) {
+            return TabUtils.getContainsString(args[0], Arrays.asList("create", "cell", "delete", "incarcerate", "tp", "release", "version"));
+        } else if (args[0].equalsIgnoreCase("cell")) {
+            if (args.length == 2) {
+                return TabUtils.getContainsString(args[1], Arrays.asList("create", "delete", "setdoor", "setspawn"));
+            } else if (args.length == 3) {
+                return TabUtils.getContainsString(args[2], listOfJails);
+            } else if (args.length == 4 && !args[1].equalsIgnoreCase("create")) {
+                return this.jailsMap.containsKey(args[2]) ? this.jailsMap.get(args[2]).getJailCells().keySet().stream().map(String::valueOf).collect(Collectors.toList()) : null;
+            }
+        } else if (args[0].equalsIgnoreCase("delete")) {
+            if (args.length == 2) {
+                return TabUtils.getContainsString(args[1], listOfJails);
+            }
+            return null;
+        } else if (args[0].equalsIgnoreCase("incarcerate")) {
+            if (args.length == 2) {
+                return TabUtils.getContainsString(args[1], listOfPlayer);
+            } else if (args.length == 3) {
+                return TabUtils.getContainsString(args[2], listOfJails);
+            }
+            return null;
+        } else if (args[0].equalsIgnoreCase("tp")) {
+            if (args.length == 2) {
+                return TabUtils.getContainsString(args[1], listOfJails);
+            }
+            return null;
+        } else if (args[0].equalsIgnoreCase("release")) {
+            if (args.length == 2) {
+                return TabUtils.getContainsString(args[1], listOfPlayer);
+            }
+            return null;
+        }
+        return null;
     }
 }

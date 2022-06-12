@@ -10,10 +10,10 @@ import java.util.UUID;
 public class SetListMap {
 
     //Clear when the server shuts down.
-    private Map<String, JailObject> jailsMap;
+    private final Map<String, JailObject> jailsMap;
 
     //Remove player when player leaves.
-    private Map<UUID, JailPlayerObject> jailPlayersMap;
+    private final Map<UUID, JailPlayerObject> jailPlayersMap;
 
     public SetListMap() {
         this.jailsMap = new HashMap<>();

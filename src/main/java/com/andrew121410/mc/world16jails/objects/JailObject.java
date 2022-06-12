@@ -18,9 +18,9 @@ import java.util.Optional;
 @SerializableAs("JailObject")
 public class JailObject implements ConfigurationSerializable {
 
-    private String name;
-    private Location jailLocation;
-    private Map<Integer, JailCellObject> jailCells;
+    private final String name;
+    private final Location jailLocation;
+    private final Map<Integer, JailCellObject> jailCells;
 
     public JailObject(String name, Location jailLocation, Map<Integer, JailCellObject> jailCellObjects) {
         this.name = name;
@@ -30,6 +30,14 @@ public class JailObject implements ConfigurationSerializable {
 
     public JailObject(String name, Location jailLocation) {
         this(name, jailLocation, new HashMap<>());
+    }
+
+    public static Door isDoor(Location location) {
+        Door door = null;
+        if (location.getBlock().getType() == Material.IRON_DOOR) {
+            door = (Door) location.getBlock().getBlockData();
+        }
+        return door;
     }
 
     public void jailPlayer(Player player, Integer number, int seconds) {
@@ -84,14 +92,6 @@ public class JailObject implements ConfigurationSerializable {
             }
         }
         Bukkit.getServer().broadcastMessage(Translate.color("&9[Jail]&r&6 " + player.getDisplayName() + " has been released from jail."));
-    }
-
-    public static Door isDoor(Location location) {
-        Door door = null;
-        if (location.getBlock().getType() == Material.IRON_DOOR) {
-            door = (Door) location.getBlock().getBlockData();
-        }
-        return door;
     }
 
     public boolean IfDoorThenDoIfNotThenFalse(Block block, boolean b) {

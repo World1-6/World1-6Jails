@@ -2,7 +2,7 @@ package com.andrew121410.mc.world16jails.objects;
 
 import com.andrew121410.mc.world16jails.World16Jails;
 import com.andrew121410.mc.world16utils.chat.Translate;
-import com.andrew121410.mc.world16utils.runnable.CountdownTimer;
+import com.andrew121410.mc.world16utils.time.CountdownTimer;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -17,18 +17,17 @@ import java.util.UUID;
 @SerializableAs("JailPlayerObject")
 public class JailPlayerObject implements ConfigurationSerializable {
 
-    private UUID uuid;
-    private CountdownTimer countdownTimer;
-    private String jailName;
-    private int cellNumber;
+    private final UUID uuid;
+    private final CountdownTimer countdownTimer;
+    private final String jailName;
+    private final int cellNumber;
 
     public JailPlayerObject(UUID uuid, int secondsLeft, String jailName, int cellNumber) {
         this.uuid = uuid;
         this.countdownTimer = new CountdownTimer(World16Jails.getPlugin(), secondsLeft + 10, secondsLeft, () -> World16Jails.getPlugin().getJailManager().releasePlayer(get()), (countdownTimer1 -> {
             Player player1 = getPlayer();
-            if (player1 == null) return;
-            if (!player1.isOnline()) return;
-            getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(Translate.color("&6You have " + countdownTimer1.getSecondsLeft() + " seconds left!")));
+            if (player1 == null || !player1.isOnline()) return;
+            getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(Translate.color("&6You have " + countdownTimer1.getFancyTimeLeft(true) + " left in jail.")));
         }));
         this.jailName = jailName;
         this.cellNumber = cellNumber;

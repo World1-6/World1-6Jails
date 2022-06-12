@@ -7,7 +7,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class OnPlayerJoinEvent implements Listener {
 
-    private World16Jails plugin;
+    private final World16Jails plugin;
 
     public OnPlayerJoinEvent(World16Jails plugin) {
         this.plugin = plugin;

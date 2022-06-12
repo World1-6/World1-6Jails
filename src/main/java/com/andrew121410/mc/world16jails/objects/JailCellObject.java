@@ -11,7 +11,7 @@ import java.util.Map;
 @SerializableAs("JailCellObject")
 public class JailCellObject implements ConfigurationSerializable {
 
-    private int number;
+    private final int number;
     private Location spawnLocation;
     private Location doorLocation;
     private JailPlayerObject jailPlayerObject;

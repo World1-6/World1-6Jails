@@ -13,19 +13,23 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class World16Jails extends JavaPlugin {
 
+    public static final String VERSION = "1.2";
+    private static World16Jails plugin;
+
     static {
         ConfigurationSerialization.registerClass(JailPlayerObject.class, "JailPlayerObject");
         ConfigurationSerialization.registerClass(JailCellObject.class, "JailCellObject");
         ConfigurationSerialization.registerClass(JailObject.class, "JailObject");
     }
 
-    public static final String VERSION = "1.1";
-
-    private static World16Jails plugin;
     private SetListMap setListMap;
     private OtherPlugins otherPlugins;
 
     private JailManager jailManager;
+
+    public static World16Jails getPlugin() {
+        return plugin;
+    }
 
     @Override
     public void onEnable() {
@@ -67,9 +71,5 @@ public class World16Jails extends JavaPlugin {
 
     public OtherPlugins getOtherPlugins() {
         return otherPlugins;
-    }
-
-    public static World16Jails getPlugin() {
-        return plugin;
     }
 }

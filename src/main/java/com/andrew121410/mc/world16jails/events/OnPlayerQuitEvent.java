@@ -7,7 +7,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class OnPlayerQuitEvent implements Listener {
 
-    private World16Jails plugin;
+    private final World16Jails plugin;
 
     public OnPlayerQuitEvent(World16Jails plugin) {
         this.plugin = plugin;
