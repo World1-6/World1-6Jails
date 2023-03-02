@@ -1,4 +1,4 @@
-package com.andrew121410.mc.world16jails.events;
+package com.andrew121410.mc.world16jails.listeners;
 
 import com.andrew121410.mc.world16jails.World16Jails;
 import org.bukkit.event.EventHandler;

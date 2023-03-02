@@ -1,7 +1,7 @@
 package com.andrew121410.mc.world16jails;
 
 import com.andrew121410.mc.world16jails.commands.JailCMD;
-import com.andrew121410.mc.world16jails.events.*;
+import com.andrew121410.mc.world16jails.listeners.*;
 import com.andrew121410.mc.world16jails.managers.JailManager;
 import com.andrew121410.mc.world16jails.objects.JailCellObject;
 import com.andrew121410.mc.world16jails.objects.JailObject;
@@ -11,10 +11,9 @@ import com.andrew121410.mc.world16jails.utils.SetListMap;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class World16Jails extends JavaPlugin {
+import java.util.UUID;
 
-    public static final String VERSION = "1.2";
-    private static World16Jails plugin;
+public class World16Jails extends JavaPlugin {
 
     static {
         ConfigurationSerialization.registerClass(JailPlayerObject.class, "JailPlayerObject");
@@ -22,14 +21,13 @@ public class World16Jails extends JavaPlugin {
         ConfigurationSerialization.registerClass(JailObject.class, "JailObject");
     }
 
+    public static final String VERSION = "1.3";
+    private static World16Jails plugin;
+
     private SetListMap setListMap;
     private OtherPlugins otherPlugins;
 
     private JailManager jailManager;
-
-    public static World16Jails getPlugin() {
-        return plugin;
-    }
 
     @Override
     public void onEnable() {
@@ -38,8 +36,8 @@ public class World16Jails extends JavaPlugin {
         this.otherPlugins = new OtherPlugins(this);
         this.jailManager = new JailManager(this);
         this.jailManager.loadAllJails();
-        regEvents();
-        regCommands();
+        registerListeners();
+        registerCommands();
     }
 
     @Override
@@ -48,8 +46,8 @@ public class World16Jails extends JavaPlugin {
         this.jailManager.saveAllJailedPlayers();
     }
 
-    private void regEvents() {
-        new OnAsyncPlayerChatEvent(this);
+    private void registerListeners() {
+        new OnAsyncChatEvent(this);
         new OnPlayerCommandPreprocessEvent(this);
         new OnPlayerInteractEvent(this);
         new OnPlayerJoinEvent(this);
@@ -57,8 +55,12 @@ public class World16Jails extends JavaPlugin {
         new OnPlayerTeleportEvent(this);
     }
 
-    private void regCommands() {
+    private void registerCommands() {
         new JailCMD(this);
+    }
+
+    public boolean isPlayerJailed(UUID uuid) {
+        return this.setListMap.getJailPlayersMap().containsKey(uuid);
     }
 
     public SetListMap getSetListMap() {
@@ -71,5 +73,9 @@ public class World16Jails extends JavaPlugin {
 
     public OtherPlugins getOtherPlugins() {
         return otherPlugins;
+    }
+
+    public static World16Jails getPlugin() {
+        return plugin;
     }
 }
