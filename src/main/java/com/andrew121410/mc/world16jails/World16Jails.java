@@ -8,6 +8,7 @@ import com.andrew121410.mc.world16jails.objects.JailObject;
 import com.andrew121410.mc.world16jails.objects.JailPlayerObject;
 import com.andrew121410.mc.world16jails.utils.OtherPlugins;
 import com.andrew121410.mc.world16jails.utils.SetListMap;
+import com.andrew121410.mc.world16utils.updater.UpdateManager;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -38,6 +39,9 @@ public class World16Jails extends JavaPlugin {
         this.jailManager.loadAllJails();
         registerListeners();
         registerCommands();
+
+        // Register updater
+        UpdateManager.registerUpdater(this, new com.andrew121410.mc.world16jails.Updater(this));
     }
 
     @Override
