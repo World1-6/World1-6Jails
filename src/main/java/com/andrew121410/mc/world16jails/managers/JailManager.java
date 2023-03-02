@@ -1,10 +1,11 @@
 package com.andrew121410.mc.world16jails.managers;
 
+import com.andrew121410.mc.world16jails.Jail;
+import com.andrew121410.mc.world16jails.JailedPlayer;
 import com.andrew121410.mc.world16jails.World16Jails;
-import com.andrew121410.mc.world16jails.objects.JailObject;
-import com.andrew121410.mc.world16jails.objects.JailPlayerObject;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.config.CustomYmlManager;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
@@ -13,8 +14,8 @@ import java.util.UUID;
 
 public class JailManager {
 
-    private final Map<String, JailObject> jailsMap;
-    private final Map<UUID, JailPlayerObject> jailPlayerMap;
+    private final Map<String, Jail> jailMap;
+    private final Map<UUID, JailedPlayer> jailedPlayerMap;
 
     private final World16Jails plugin;
 
@@ -23,10 +24,10 @@ public class JailManager {
     public JailManager(World16Jails plugin) {
         this.plugin = plugin;
 
-        this.jailsMap = this.plugin.getSetListMap().getJailsMap();
-        this.jailPlayerMap = this.plugin.getSetListMap().getJailPlayersMap();
+        this.jailMap = this.plugin.getJailsMap();
+        this.jailedPlayerMap = this.plugin.getJailedPlayerMap();
 
-        //jails.yml
+        // jails.yml
         this.jailsYml = new CustomYmlManager(this.plugin, false);
         this.jailsYml.setup("jails.yml");
         this.jailsYml.saveConfig();
@@ -37,62 +38,63 @@ public class JailManager {
         if (jailsSection == null) {
             this.jailsYml.getConfig().createSection("Jails");
             this.jailsYml.getConfig().createSection("JailPlayers");
+            this.jailsYml.saveConfig();
         }
     }
 
-    private JailObject loadJail(String name) {
+    private Jail loadJail(String name) {
         ConfigurationSection jailsSection = this.jailsYml.getConfig().getConfigurationSection("Jails");
-        return (JailObject) jailsSection.get(name);
+        return (Jail) jailsSection.get(name);
     }
 
-    private void saveJail(JailObject jailObject) {
+    private void saveJail(Jail jail) {
         ConfigurationSection jailsSection = this.jailsYml.getConfig().getConfigurationSection("Jails");
-        jailsSection.set(jailObject.getName(), jailObject);
+        jailsSection.set(jail.getName(), jail);
         this.jailsYml.saveConfig();
     }
 
     public void loadAllJails() {
         ConfigurationSection jailsSection = this.jailsYml.getConfig().getConfigurationSection("Jails");
         for (String key : jailsSection.getKeys(false)) {
-            this.jailsMap.put(key, loadJail(key));
+            this.jailMap.put(key, loadJail(key));
         }
     }
 
     public void saveAllJails() {
-        this.jailsMap.forEach((name, jail) -> saveJail(jail));
+        this.jailMap.forEach((name, jail) -> saveJail(jail));
     }
 
-    private JailPlayerObject loadPlayer(UUID uuid) {
+    private JailedPlayer loadPlayer(UUID uuid) {
         ConfigurationSection jailPlayersSection = this.jailsYml.getConfig().getConfigurationSection("JailPlayers");
-        return (JailPlayerObject) jailPlayersSection.get(uuid.toString());
+        return (JailedPlayer) jailPlayersSection.get(uuid.toString());
     }
 
-    private void savePlayer(JailPlayerObject jailPlayerObject) {
+    private void savePlayer(JailedPlayer jailedPlayer) {
         ConfigurationSection jailPlayersSection = this.jailsYml.getConfig().getConfigurationSection("JailPlayers");
-        jailPlayersSection.set(jailPlayerObject.getUuid().toString(), jailPlayerObject);
+        jailPlayersSection.set(jailedPlayer.getUuid().toString(), jailedPlayer);
         this.jailsYml.saveConfig();
     }
 
     public void loadPlayer(Player player) {
-        JailPlayerObject jailPlayerObject = loadPlayer(player.getUniqueId());
-        if (jailPlayerObject == null) return; //Player isn't in jail so return.
-        jailPlayerObject.getCountdownTimer().scheduleTimer();
-        this.jailPlayerMap.put(player.getUniqueId(), jailPlayerObject);
+        JailedPlayer jailedPlayer = loadPlayer(player.getUniqueId());
+        if (jailedPlayer == null) return; //Player isn't in jail so return.
+        jailedPlayer.getCountdownTimer().scheduleTimer();
+        this.jailedPlayerMap.put(player.getUniqueId(), jailedPlayer);
     }
 
     public void saveAllJailedPlayers() {
-        this.jailPlayerMap.forEach(((uuid, jailPlayerObject) -> {
+        this.jailedPlayerMap.forEach(((uuid, jailPlayerObject) -> {
             jailPlayerObject.getCountdownTimer().cancelTimer();
             savePlayer(jailPlayerObject);
         }));
     }
 
     public void unloadPlayer(UUID uuid) {
-        JailPlayerObject jailPlayerObject = this.jailPlayerMap.get(uuid);
-        if (jailPlayerObject == null) return;
-        jailPlayerObject.getCountdownTimer().cancelTimer();
-        savePlayer(jailPlayerObject);
-        this.jailPlayerMap.remove(uuid);
+        JailedPlayer jailedPlayer = this.jailedPlayerMap.get(uuid);
+        if (jailedPlayer == null) return;
+        jailedPlayer.getCountdownTimer().cancelTimer();
+        savePlayer(jailedPlayer);
+        this.jailedPlayerMap.remove(uuid);
     }
 
     public void deletePlayer(UUID uuid) {
@@ -107,21 +109,21 @@ public class JailManager {
         this.jailsYml.saveConfig();
     }
 
-    public void releasePlayer(JailPlayerObject jailPlayerObject) {
-        JailObject jailObject = this.jailsMap.get(jailPlayerObject.getJailName());
+    public void releasePlayer(JailedPlayer jailedPlayer) {
+        Jail jail = this.jailMap.get(jailedPlayer.getJailName());
         //So this runs when the player was put in jail but somebody deleted the jail.
-        if (jailObject == null) {
-            jailPlayerObject.getPlayer().sendMessage(Translate.color("&6The jail was deleted but you were in in but you have been released."));
-            jailPlayerObject.getCountdownTimer().cancelTimer();
-            this.jailPlayerMap.remove(jailPlayerObject.getUuid());
+        if (jail == null) {
+            jailedPlayer.getPlayer().sendMessage(Translate.color("&6The jail was deleted but you were in in but you have been released."));
+            jailedPlayer.getCountdownTimer().cancelTimer();
+            this.jailedPlayerMap.remove(jailedPlayer.getUuid());
             return;
         }
-        jailObject.releasePlayer(jailPlayerObject);
+        jail.releasePlayer(jailedPlayer);
     }
 
-    public void jailPlayer(Player player, String jailName, Integer cellNumber, int seconds) {
-        JailObject jailObject = this.jailsMap.get(jailName);
-        if (jailObject == null) return;
-        jailObject.jailPlayer(player, cellNumber, seconds);
+    public void jailPlayer(CommandSender sender, Player target, String jailName, Integer cellNumber, int seconds) {
+        Jail jail = this.jailMap.get(jailName);
+        if (jail == null) return;
+        jail.jailPlayer(sender, target, cellNumber, seconds);
     }
 }
