@@ -1,5 +1,6 @@
-package com.andrew121410.mc.world16jails.objects;
+package com.andrew121410.mc.world16jails;
 
+import com.andrew121410.mc.world16utils.config.UnlinkedWorldLocation;
 import org.bukkit.Location;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -8,34 +9,34 @@ import org.bukkit.configuration.serialization.SerializableAs;
 import java.util.HashMap;
 import java.util.Map;
 
-@SerializableAs("JailCellObject")
-public class JailCellObject implements ConfigurationSerializable {
+@SerializableAs("JailCell")
+public class JailCell implements ConfigurationSerializable {
 
     private final int number;
-    private Location spawnLocation;
-    private Location doorLocation;
-    private JailPlayerObject jailPlayerObject;
+    private UnlinkedWorldLocation spawnLocation;
+    private UnlinkedWorldLocation doorLocation;
+    private JailedPlayer jailedPlayer;
 
-    public JailCellObject(int number, Location spawnLocation, Location doorLocation, JailPlayerObject jailPlayerObject) {
+    public JailCell(int number, UnlinkedWorldLocation spawnLocation, UnlinkedWorldLocation doorLocation, JailedPlayer jailedPlayer) {
         this.number = number;
         this.spawnLocation = spawnLocation;
         this.doorLocation = doorLocation;
-        this.jailPlayerObject = jailPlayerObject;
+        this.jailedPlayer = jailedPlayer;
     }
 
     public int getNumber() {
         return number;
     }
 
-    public JailPlayerObject getJailPlayerObject() {
-        return jailPlayerObject;
+    public JailedPlayer getJailedPlayer() {
+        return jailedPlayer;
     }
 
-    public void setJailPlayerObject(JailPlayerObject jailPlayerObject) {
-        this.jailPlayerObject = jailPlayerObject;
+    public void setJailedPlayer(JailedPlayer jailedPlayer) {
+        this.jailedPlayer = jailedPlayer;
     }
 
-    public Location getDoorLocation() {
+    public UnlinkedWorldLocation getDoorLocation() {
         return doorLocation;
     }
 
@@ -45,25 +46,25 @@ public class JailCellObject implements ConfigurationSerializable {
             return;
         }
         Location newDoorLocation;
-        Door door = JailObject.isDoor(doorLocation);
+        Door door = Jail.isDoor(doorLocation);
         if (door != null) {
             if (door.getHalf().toString().equals("TOP")) {
                 newDoorLocation = doorLocation.subtract(0, 1, 0);
             } else newDoorLocation = doorLocation;
         } else newDoorLocation = doorLocation.add(0, 1, 0);
-        if (JailObject.isDoor(newDoorLocation) == null) this.doorLocation = null;
+        if (Jail.isDoor(newDoorLocation) == null) this.doorLocation = null;
         door = (Door) newDoorLocation.getBlock().getBlockData();
         door.setOpen(true);
         doorLocation.getBlock().setBlockData(door);
-        this.doorLocation = newDoorLocation;
+        this.doorLocation = new UnlinkedWorldLocation(newDoorLocation);
     }
 
-    public Location getSpawnLocation() {
+    public UnlinkedWorldLocation getSpawnLocation() {
         return spawnLocation;
     }
 
     public void setSpawnLocation(Location spawnLocation) {
-        this.spawnLocation = spawnLocation;
+        this.spawnLocation = new UnlinkedWorldLocation(spawnLocation);
     }
 
     @Override
@@ -72,11 +73,13 @@ public class JailCellObject implements ConfigurationSerializable {
         map.put("Number", this.number);
         map.put("SpawnLocation", this.spawnLocation);
         map.put("DoorLocation", this.doorLocation);
-        map.put("JailPlayer", this.jailPlayerObject);
+        map.put("JailPlayer", this.jailedPlayer);
         return map;
     }
 
-    public static JailCellObject deserialize(Map<String, Object> map) {
-        return new JailCellObject((int) map.get("Number"), (Location) map.get("SpawnLocation"), (Location) map.get("DoorLocation"), (JailPlayerObject) map.get("JailPlayer"));
+    public static JailCell deserialize(Map<String, Object> map) {
+        UnlinkedWorldLocation unlinkedSpawnLocation = (UnlinkedWorldLocation) map.get("SpawnLocation");
+        UnlinkedWorldLocation unlinkedDoorLocation = (UnlinkedWorldLocation) map.get("DoorLocation");
+        return new JailCell((int) map.get("Number"), unlinkedSpawnLocation, unlinkedDoorLocation, (JailedPlayer) map.get("JailPlayer"));
     }
 }

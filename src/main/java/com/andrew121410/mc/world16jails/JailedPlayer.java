@@ -1,10 +1,7 @@
-package com.andrew121410.mc.world16jails.objects;
+package com.andrew121410.mc.world16jails;
 
-import com.andrew121410.mc.world16jails.World16Jails;
 import com.andrew121410.mc.world16utils.chat.Translate;
 import com.andrew121410.mc.world16utils.time.CountdownTimer;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -14,26 +11,26 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@SerializableAs("JailPlayerObject")
-public class JailPlayerObject implements ConfigurationSerializable {
+@SerializableAs("JailedPlayer")
+public class JailedPlayer implements ConfigurationSerializable {
 
     private final UUID uuid;
     private final CountdownTimer countdownTimer;
     private final String jailName;
     private final int cellNumber;
 
-    public JailPlayerObject(UUID uuid, int secondsLeft, String jailName, int cellNumber) {
+    public JailedPlayer(UUID uuid, int secondsLeft, String jailName, int cellNumber) {
         this.uuid = uuid;
         this.countdownTimer = new CountdownTimer(World16Jails.getPlugin(), secondsLeft + 10, secondsLeft, () -> World16Jails.getPlugin().getJailManager().releasePlayer(get()), (countdownTimer1 -> {
             Player player1 = getPlayer();
             if (player1 == null || !player1.isOnline()) return;
-            getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(Translate.color("&6You have " + countdownTimer1.getFancyTimeLeft(true) + " left in jail.")));
+            getPlayer().sendActionBar(Translate.miniMessage("<gold>You have <yellow>" + countdownTimer1.getFancyTimeLeft(false) + " <gold>left in jail."));
         }));
         this.jailName = jailName;
         this.cellNumber = cellNumber;
     }
 
-    public JailPlayerObject get() {
+    public JailedPlayer get() {
         return this;
     }
 
@@ -67,7 +64,7 @@ public class JailPlayerObject implements ConfigurationSerializable {
         return map;
     }
 
-    public static JailPlayerObject deserialize(Map<String, Object> map) {
-        return new JailPlayerObject((UUID) map.get("UUID"), (int) map.get("SecondsLeft"), (String) map.get("JailName"), (int) map.get("CellNumber"));
+    public static JailedPlayer deserialize(Map<String, Object> map) {
+        return new JailedPlayer((UUID) map.get("UUID"), (int) map.get("SecondsLeft"), (String) map.get("JailName"), (int) map.get("CellNumber"));
     }
 }

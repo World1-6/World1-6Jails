@@ -1,14 +1,16 @@
 package com.andrew121410.mc.world16jails.commands;
 
+import com.andrew121410.mc.world16jails.Jail;
+import com.andrew121410.mc.world16jails.JailCell;
+import com.andrew121410.mc.world16jails.JailedPlayer;
 import com.andrew121410.mc.world16jails.World16Jails;
 import com.andrew121410.mc.world16jails.managers.JailManager;
-import com.andrew121410.mc.world16jails.objects.JailCellObject;
-import com.andrew121410.mc.world16jails.objects.JailObject;
-import com.andrew121410.mc.world16jails.objects.JailPlayerObject;
 import com.andrew121410.mc.world16utils.chat.Translate;
+import com.andrew121410.mc.world16utils.config.UnlinkedWorldLocation;
 import com.andrew121410.mc.world16utils.player.PlayerUtils;
 import com.andrew121410.mc.world16utils.utils.TabUtils;
 import com.andrew121410.mc.world16utils.utils.Utils;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,8 +22,8 @@ import java.util.stream.Collectors;
 
 public class JailCMD implements CommandExecutor, TabCompleter {
 
-    private final Map<String, JailObject> jailsMap;
-    private final Map<UUID, JailPlayerObject> jailPlayerMap;
+    private final Map<String, Jail> jailsMap;
+    private final Map<UUID, JailedPlayer> jailPlayerMap;
 
     private final World16Jails plugin;
     private final JailManager jailManager;
@@ -30,8 +32,8 @@ public class JailCMD implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
         this.jailManager = this.plugin.getJailManager();
 
-        this.jailsMap = this.plugin.getSetListMap().getJailsMap();
-        this.jailPlayerMap = this.plugin.getSetListMap().getJailPlayersMap();
+        this.jailsMap = this.plugin.getJailsMap();
+        this.jailPlayerMap = this.plugin.getJailedPlayerMap();
 
         this.plugin.getCommand("jail").setExecutor(this);
         this.plugin.getCommand("jail").setTabCompleter(this);
@@ -45,7 +47,7 @@ public class JailCMD implements CommandExecutor, TabCompleter {
         }
 
         if (!player.hasPermission("world16.jail")) {
-            player.sendMessage(Translate.color("&4You don't have permission -> world16.jail"));
+            player.sendMessage(Translate.miniMessage("<darK_red>You don't have permission to use this command."));
             return true;
         }
 
@@ -61,8 +63,8 @@ public class JailCMD implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            JailObject jailObject = new JailObject(jailName, player.getLocation());
-            this.jailsMap.put(jailName, jailObject);
+            Jail jail = new Jail(jailName, player.getLocation().clone());
+            this.jailsMap.put(jailName, jail);
             player.sendMessage(Translate.color("&aJail: " + jailName + " has been created!"));
             return true;
         } else if (args.length >= 1 && args[0].equalsIgnoreCase("cell")) {
@@ -76,39 +78,45 @@ public class JailCMD implements CommandExecutor, TabCompleter {
                 player.sendMessage(Translate.color("&6/jail cell setdoor <Jail> <Number> &r-Make sure you look at the block under the door."));
                 player.sendMessage(Translate.color("&6/jail cell setspawn <Jail> <Number>"));
                 return true;
-            } else if (args.length == 4) {
-                JailObject jailObject = this.jailsMap.get(args[2]);
+            } else if (args.length == 4) { //
+                Jail jail = this.jailsMap.get(args[2]);
                 Integer integer = Utils.asIntegerOrElse(args[3], Integer.MIN_VALUE);
-                if (jailObject == null) {
+
+                // Check if jail exists
+                if (jail == null) {
                     player.sendMessage(Translate.color("&cJail doesn't exist"));
                     return true;
                 }
+
+                // Check if number is valid
                 if (integer == Integer.MIN_VALUE) {
-                    player.sendMessage(Translate.color("&cNot a int."));
+                    player.sendMessage(Translate.miniMessage("<dark_red>Invalid number."));
                     return true;
                 }
-                JailCellObject jailCellObject = jailObject.getJailCells().get(integer);
-                if (jailCellObject == null && !args[1].equalsIgnoreCase("create")) {
+
+                // Only check if jail cell exists if we are not creating it.
+                JailCell jailCell = jail.getJailCells().get(integer);
+                if (jailCell == null && !args[1].equalsIgnoreCase("create")) {
                     player.sendMessage(Translate.color("&cJail cell doesn't exist."));
                     return true;
                 }
 
                 switch (args[1].toLowerCase()) {
                     case "create" -> {
-                        JailCellObject jailCellObject1 = new JailCellObject(integer, player.getLocation(), null, null);
-                        jailObject.getJailCells().putIfAbsent(integer, jailCellObject1);
+                        JailCell newJailCell = new JailCell(integer, new UnlinkedWorldLocation(player.getLocation().clone()), null, null);
+                        jail.getJailCells().putIfAbsent(integer, newJailCell);
                         player.sendMessage(Translate.color("&aJail cell has been created."));
                     }
                     case "delete" -> {
-                        jailObject.getJailCells().remove(integer);
+                        jail.getJailCells().remove(integer);
                         player.sendMessage(Translate.color("&4Jail cell has been deleted"));
                     }
                     case "setdoor" -> {
-                        jailCellObject.setDoorLocation(PlayerUtils.getBlockPlayerIsLookingAt(player).getLocation());
+                        jailCell.setDoorLocation(PlayerUtils.getBlockPlayerIsLookingAt(player).getLocation());
                         player.sendMessage(Translate.color("&aDoor has been set for the cell."));
                     }
                     case "setspawn" -> {
-                        jailCellObject.setSpawnLocation(player.getLocation());
+                        jailCell.setSpawnLocation(player.getLocation());
                         player.sendMessage(Translate.color("&aThe setspawn for that cell has been changed!"));
                     }
                 }
@@ -119,8 +127,8 @@ public class JailCMD implements CommandExecutor, TabCompleter {
                 player.sendMessage(Translate.color("&4You don't have permission -> world16.jail.incarcerate"));
                 return true;
             }
-            JailObject jailObject = this.jailsMap.get(args[1]);
-            if (jailObject == null) {
+            Jail jail = this.jailsMap.get(args[1]);
+            if (jail == null) {
                 player.sendMessage("&cCould not find jail.");
                 return true;
             }
@@ -142,8 +150,8 @@ public class JailCMD implements CommandExecutor, TabCompleter {
                 player.sendMessage(Translate.color("&cCould not find player."));
                 return true;
             }
-            JailObject jailObject = this.jailsMap.get(jailName);
-            if (jailObject == null) {
+            Jail jail = this.jailsMap.get(jailName);
+            if (jail == null) {
                 player.sendMessage(Translate.color("&cJail not found."));
                 return true;
             }
@@ -151,19 +159,25 @@ public class JailCMD implements CommandExecutor, TabCompleter {
                 player.sendMessage(Translate.color("&cNot a int."));
                 return true;
             }
-            this.jailManager.jailPlayer(player1, jailName, null, seconds);
+            this.jailManager.jailPlayer(player, player1, jailName, null, seconds);
             player.sendMessage(Translate.color("&aPlayer has been jailed."));
             return true;
         } else if (args.length == 2 && args[0].equalsIgnoreCase("tp")) {
             String jailName = args[1];
-            JailObject jailObject = this.jailsMap.get(jailName);
+            Jail jail = this.jailsMap.get(jailName);
 
-            if (jailObject == null) {
+            if (jail == null) {
                 player.sendMessage(Translate.color("&cNot a jail."));
                 return true;
             }
 
-            player.teleport(jailObject.getJailLocation());
+            Location jailLocation = jail.getJailLocation().toLocation();
+            if (!jailLocation.isWorldLoaded()) {
+                player.sendMessage(Translate.colorc("&cWorld is not loaded."));
+                return true;
+            }
+
+            player.teleport(jailLocation);
             player.sendMessage(Translate.color("&6Teleporting..."));
             return true;
         } else if (args.length == 2 && args[0].equalsIgnoreCase("release")) {
