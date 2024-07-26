@@ -55,15 +55,15 @@ public class Jail implements ConfigurationSerializable {
         }
 
         // Check if the world is loaded.
-        Location cellLocation = jailCell.getSpawnLocation().toLocation();
+        Location cellLocation = jailCell.getSpawnLocation();
         if (!cellLocation.isWorldLoaded()) {
             sender.sendMessage(Translate.miniMessage("<red>World is not loaded."));
             return;
         }
 
         // Check if the door is still there.
-        if (jailCell.getDoorLocation() != null && jailCell.getDoorLocation().toLocation().isWorldLoaded()) {
-            if (!IfDoorThenDoIfNotThenFalse(jailCell.getDoorLocation().toLocation().getBlock(), false)) {
+        if (jailCell.getDoorLocation() != null && jailCell.getDoorLocation().isWorldLoaded()) {
+            if (!IfDoorThenDoIfNotThenFalse(jailCell.getDoorLocation().getBlock(), false)) {
                 jailCell.setDoorLocation(null);
             }
         }
@@ -73,7 +73,7 @@ public class Jail implements ConfigurationSerializable {
         jailCell.setJailedPlayer(jailedPlayer);
 
         // Teleport player to cell.
-        target.teleport(jailCell.getSpawnLocation().toLocation());
+        target.teleport(jailCell.getSpawnLocation());
         target.sendMessage(Translate.miniMessage("<dark_red>You have been jailed for " + seconds + " seconds."));
 
         jailedPlayer.getCountdownTimer().scheduleTimer();
@@ -94,7 +94,7 @@ public class Jail implements ConfigurationSerializable {
 
         UnlinkedWorldLocation unlinkedDoorLocation = jailCell.getDoorLocation();
         if (unlinkedDoorLocation != null) {
-            Location doorLocation = unlinkedDoorLocation.toLocation();
+            Location doorLocation = unlinkedDoorLocation;
             if (doorLocation != null && doorLocation.isWorldLoaded()) {
                 Block jailDoorBlock = doorLocation.getBlock();
                 if (IfDoorThenDoIfNotThenFalse(jailDoorBlock, true)) {

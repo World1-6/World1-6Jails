@@ -171,7 +171,7 @@ public class JailCMD implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            Location jailLocation = jail.getJailLocation().toLocation();
+            Location jailLocation = jail.getJailLocation();
             if (!jailLocation.isWorldLoaded()) {
                 player.sendMessage(Translate.colorc("&cWorld is not loaded."));
                 return true;
