@@ -23,7 +23,7 @@ jobs:
           cache: gradle
 
       - name: Build with Gradle # https://github.com/gradle/gradle-build-action -> https://github.com/gradle/actions
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v6
         with:
           arguments: build
 
